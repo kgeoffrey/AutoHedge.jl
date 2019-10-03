@@ -1,4 +1,4 @@
-### Finding the implied volatility with Newton's Methed
+### Finding the implied volatility with Newton's Method
 
 using ForwardDiff, Distributions
 

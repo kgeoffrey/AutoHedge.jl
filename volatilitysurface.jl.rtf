@@ -1,0 +1,114 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1561\cocoasubrtf600
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red32\green32\blue32;\red255\green255\blue255;\red0\green0\blue0;
+}
+{\*\expandedcolortbl;;\cssrgb\c16863\c16863\c16863;\cssrgb\c100000\c100000\c100000;\cssrgb\c0\c0\c0;
+}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 ## Example of computing and graphing volatility surface\
+\
+using Pkg\
+using ForwardDiff, Distributions\
+using Plots\
+using Interpolations\
+\pard\pardeftab720\parhyphenfactor20\partightenfactor0
+\cf2 \cb3 \expnd0\expndtw0\kerning0
+using Random\
+Random.seed!(1234)\cf0 \cb1 \kerning1\expnd0\expndtw0 \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 \
+## BS functions \
+\
+d = Normal()\
+d1(S,K,T,r,v) = (log(S/K) + (r + v*v/2)*T)/(v*sqrt(T))\
+d2(S,K,T,r,v) = (log(S/K) + (r - v*v/2)*T)/(v*sqrt(T)) #- v*sqrt(T)\
+call_price(S,K,T,r,v,q) = S*exp(-q*T)*cdf(d, d1(S,K,T,r,v)) - K*exp(-r*T)*cdf(d, d2(S,K,T,r,v))\
+put_price(S,K,T,r,v,q) = K*exp(-r*T)*cdf(d, -d2(S,K,T,r,v)) - S*exp(-q*T)*cdf(d, -d1(S,K,T,r,v))\
+\
+# varying the option price too to make it look more realistic as well\
+function iter_newton(sigma_0, tolerance, maxiter,market_price, S, K, T, r, q=0)\
+    #sigma_0: initial guess for sigma, 0.5 recommended\
+    #tolerance: precision of approximation\
+    #maxiter: set maximum iteration of algorithm\
+    #market_price: market price of the option \
+    #S: spot price\
+    #K: strike price\
+    #T: time to maturity\
+    #r: interest rate\
+    #q: dividends paid, set to 0\
+    \
+    market_price = round(rand(Normal(market_price,1)),digits=2)\
+    if K >= S\
+        price_v = v -> call_price(S,K,T,r,v,q)\
+    else\
+        r = -1*r\
+        price_v = v -> put_price(S,K,T,r,v,q)\
+    end\
+    # price_p = v ->  S*exp(-q*T) + put_price(S,K,T,r,v,q)- K*exp(-r*T)\
+    vega(v) = ForwardDiff.derivative(price_v, v)\
+    iter = 0\
+    v = sigma_0\
+    delta = price_v(v) - market_price\
+    while abs(delta) > tolerance && iter < maxiter\
+        v = v - 0.1*(price_v(v) - market_price) / vega(v)\
+        delta = price_v(v) - market_price\
+        iter = iter + 1\
+        # print("Volatility found was", v)\
+    end\
+    return v, iter        \
+end\
+\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 # the market price for the option is not very realistic though we get a nice surface \
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 strike = rand(Normal(180,30),60)\
+tenor= collect(range(0.5, length=40, stop=8)) # [1:8;]\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 optionp = round(rand(Normal(75.8,2)),digits=2)\
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+\cf0 z(strike, tenor) = iter_newton(0.5, 0.000001, 100, 75.8, 178, strike, tenor, 0.0112, 0)[1]\
+\
+# creating data for scatter plot\
+\
+function scatterthis()\
+    points = zeros(60*40, 3)\
+    this = 1\
+    # error = []\
+    for x in strike, y in tenor\
+        optionp = round(rand(Normal(75.8,2)),digits=2)\
+        p = iter_newton(0.5, 0.000001, 100, optionp, 178, x, y, 0.0112, 0)[1]\
+        if p <= 0\
+            break\
+        # p[p.>0.0]\
+        else\
+            points[this,:] = [x,y,p]\
+            this += 1\
+        end\
+    end\
+    return points\
+end\
+\
+# plotting scatter on top of surface\
+\
+points = scatterthis()\
+surface(strike, tenor, z, alpha = 0.3, legend=true, fc=:viridis, grid=true, gridlinewidth=3,\
+    size = (1200, 700),\
+    title = "Volatility Surface",\
+    xlabel = "Strike Price",\
+    ylabel = "Time to Maturity",\
+    zlabel = "Volatility")\
+scatter!(points[:,1], points[:,2], points[:,3], markersize=0.4)\
+\
+\
+## interpolation method  using cubic splines\
+# don\'92t use random number in iter_newton\
+\
+xs = 160:1:230\
+ys = 0.5:0.1:8\
+matrix = [z(x, y) for x in xs, y in ys]\
+interp_cubic = CubicSplineInterpolation((xs, ys), matrix)\
+interp_cubic(200, 2)\
+\
+}
