@@ -10,7 +10,8 @@ d2(S,K,T,r,v) = (log(S/K) + (r + v*v/2)*T)/(v*sqrt(T)) - v*sqrt(T)
 call_price(S,K,T,r,v,q) = S*exp(-q*T)*cdf(d, d1(S,K,T,r,v)) - K*exp(-r*T)*cdf(d, d2(S,K,T,r,v))
 put_price(S,K,T,r,v,q) = K*exp(-r*T)*cdf(d, -d2(S,K,T,r,v)) - S*exp(-q*T)*cdf(d, -d1(S,K,T,r,v))
 
-## Newton–Raphson method for finding roots (here it is the difference between the call option's market value and our guess)
+## Newton–Raphson method for finding root
+
 
 function iter_newton(sigma_0, tolerance, maxiter,market_price, S, K, T, r, q=0)
     #sigma_0: initial guess for sigma, 0.5 recommended
@@ -23,19 +24,26 @@ function iter_newton(sigma_0, tolerance, maxiter,market_price, S, K, T, r, q=0)
     #r: interest rate
     #q: dividends paid, set to 0
     
-    price_v = v -> call_price(S,K,T,r,v,q)
+    ## Intrinsic value of deep ITM options may prevent the Newton algorithm to converge
+    ## Use put-call parity and find volatility of the (opposite) OTM option instead
+    if K >= S
+        price_v = v -> call_price(S,K,T,r,v,q)
+    else
+        r = -r
+        price_v = v -> put_price(S,K,T,r,v,q)
+    end
     vega(v) = ForwardDiff.derivative(price_v, v)
     iter = 0
     v = sigma_0
     delta = price_v(v) - market_price
     while abs(delta) > tolerance && iter < maxiter
-        v = v + (market_price - price_v(v)) / vega(v)
+        v = v - 0.1*(price_v(v) - market_price) / vega(v)
         delta = price_v(v) - market_price
         iter = iter + 1
+        # print("Volatility found was", v)
     end
     return v, iter        
 end
-
 
 
 ## Example:
