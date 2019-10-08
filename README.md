@@ -3,7 +3,7 @@ Some models
 
 Example with simulated options:
 
-![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/volatilitysurface.png "Logo Title Text 1")
+![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/volatilitysurface.png "Logo Title Text 1")
 
 
 
