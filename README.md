@@ -14,9 +14,9 @@ You can find an online version here: [Interactive Volatility Surface](https://kg
 
 Example:
 
- - Simulating stock price with Gaussian walk (should be geometric Brown. motion)
+ - Simulating stock price with Gaussian walk (should be geometric Brown. motion) 
  - Rebalancing every 5th day 
- - Delta hedging portfolio consisting of call option 
+ - Delta hedging portfolio consisting of N call options expiring at T = 200
  - Everything constant except for time and spotprice:
     - K = 120
     - r = 0.01
@@ -42,10 +42,18 @@ For this we bring in a another derivative with the same under lying stock, but a
 Example:
  - Same stock price as before
  - Rebalancing every 5th day
- - Delta-Gamma hedging portfolio consisting of call option(s)
+ - Delta-Gamma hedging portfolio consisting of N call options expiring at T = 200
  - Everything constant except for time and spotprice: 
    - K1 = 110
    - K2 = 120
    - r = 0.01
    - q = 0
    - N = 1000 (number of calls options with K1)
+
+We can see that the borrowing significantly decreased with the Delta-Gamma hedge:
+![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/borrowdeltagamma.png "Logo Title Text 1")
+
+The tracking error is significantly smaller and in this case Delta-Gamma hedging is clearly the superior strategy.
+![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/valuedeltagamma.png "Logo Title Text 1")
+
+
