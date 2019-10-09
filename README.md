@@ -39,3 +39,13 @@ Example:
 An even better strategy is to try to hedge against changes in the delta of the derivative (second order derivative; also called Gamma).
 For this we bring in a another derivative with the same under lying stock, but a different strike price. 
 
+Example:
+-Same stock price as before
+-Rebalancing every 5th day
+-Delta-Gamma hedging portfolio consisting of call option(s)
+-Everything constant except for time and spotprice: 
+  -K1 = 110
+  -K2 = 120
+  -r = 0.01
+  -q = 0
+  -N = 1000 (number of calls options with K1)
