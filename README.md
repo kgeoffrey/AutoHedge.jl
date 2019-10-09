@@ -34,3 +34,8 @@ Example:
  Portfolio Value over time
  
  ![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/value.png "Logo Title Text 1")
+
+
+An even better strategy is to try to hedge against changes in the delta of the derivative (second order derivative; also called Gamma).
+For this we bring in a another derivative with the same under lying stock, but a different strike price. 
+
