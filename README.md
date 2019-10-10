@@ -77,8 +77,10 @@ Example:
  - Everything constant except for time and spotprice: 
    - K1 = 110
    - K2 = 120
+   - K3 = 130
    - r = 0.01
    - q = 0
    - N = 1000 (number of calls options with K1)
    
  The tracking error is super small, but the leverage and liquidity required for each derivative is otherwordly :alien:
+![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/dgsvalue.png "Logo Title Text 1")
