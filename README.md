@@ -84,3 +84,11 @@ Example:
    
  The tracking error is super small, but the leverage and liquidity required for each derivative is otherwordly :alien:
 ![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/dgsvalue.png "Logo Title Text 1")
+
+# 6. Portfolio Optimization
+
+text about modern portfolio theory here
+
+# 7. Machine Learning: Learning the Black-Scholes Formula
+
+sources for learning Black-Scholes Formula
