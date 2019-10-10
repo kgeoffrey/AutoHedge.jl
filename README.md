@@ -63,7 +63,22 @@ Example:
 We can see that the borrowing significantly decreased with the Delta-Gamma hedge:
 ![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/borrowdeltagamma.png "Logo Title Text 1")
 
-The tracking error is significantly smaller and in this case Delta-Gamma hedging is clearly the superior strategy.
+The tracking error is significantly smaller and in this case Delta-Gamma hedging is clearly the superior strategy - in theory. In practice, the leverage and liquidity for the derivatives required would be unrealistic 
 ![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/valuedeltagamma.png "Logo Title Text 1")
 
+# 5. For fun: Delta-Gamma-Speed Hedging
 
+If you know [Taylor's theorem](https://en.wikipedia.org/wiki/Taylor%27s_theorem) it should come to no surprise that adding more higher order greeks (we also need an additional derivative for each, to be able to solve the system of equations) yields an even better approximation. By adding another derivative we can make our portfolio 'speed' neutral (speed is the 3rd derivative of the call option with respect to price).
+
+Example:
+ - Same stock price as before
+ - Rebalancing every 5th day
+ - Delta-Gamma hedging portfolio consisting of N call options expiring at T = 200
+ - Everything constant except for time and spotprice: 
+   - K1 = 110
+   - K2 = 120
+   - r = 0.01
+   - q = 0
+   - N = 1000 (number of calls options with K1)
+   
+ The tracking error is super small, but the leverage and liquidity required for each derivative is otherwordly :alien:
