@@ -33,5 +33,6 @@ promote_rule(::Type{Dual}, ::Type{<:Number}) = Dual
 
 
 ### derivative ###
-convert(::Type{Dual}, x::Real) = Dual(x, one(x))
-promote_rule(::Type{Dual}, ::Type{<:Number}) = Dual
+function derivative(f, x)
+    return f(Dual(x,1)).g
+end
