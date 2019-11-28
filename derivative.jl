@@ -27,7 +27,7 @@ Base.sqrt(x::Dual) = Dual(sqrt(x.f), x.g / (2 * sqrt(x.f)))
 Base.log(x::Dual) = Dual(log(x.f), x.g/x.f)
 Distributions.cdf(d, x::Dual) = Dual(cdf(d, x.f), pdf(d, x.f) * x.g)
 
-### convert, promote ### 
+### convert, promote ###
 convert(::Type{Dual}, x::Real) = Dual(x, one(x))
 promote_rule(::Type{Dual}, ::Type{<:Number}) = Dual
 
@@ -36,3 +36,19 @@ promote_rule(::Type{Dual}, ::Type{<:Number}) = Dual
 function derivative(f, x)
     return f(Dual(x,1)).g
 end
+
+
+struct Darray
+    f::Array
+    g::Array
+end
+import Base: +,/,*,-,^, convert, promote_rule
+convert(::Type{Darray}, x::AbstractArray) = Darray(x, ones(length(x)))
+
++(x::Darray, y::Darray) = Darray(x.f .+ y.f, x.g .+ y.g)
+-(x::Darray, y::Darray) = Darray(x.f .- y.f, x.g .- y.g)
+*(x::Darray, y::Darray) = Darray(x.f*y.f, x.f*y.g + y.f*x.g)
+
+r = convert(Darray, t)
+
+r'*r
