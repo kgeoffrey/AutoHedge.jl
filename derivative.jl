@@ -38,6 +38,7 @@ Base.zero(x::Dual) = Dual(zero(x.f), zero(x.g))
 convert(::Type{Dual}, x::Real) = Dual(x, one(x))
 convert(::Type{Dual}, x::AbstractArray) = DualArray(x)
 convert(::Type{Array}, x::Real) = [x]
+Dual(x) = convert(Dual, x)
 promote_rule(::Type{Dual}, ::Type{<:Number}) = Dual
 
 
@@ -49,9 +50,8 @@ end
 
 new = rand(100)
 
-sigmoid(x) = x' * x
+sigmoid(x) = (x .*  x)'*x
 derivative(sigmoid, new)
-
 
 
 Dual(1,1)
@@ -70,3 +70,14 @@ end
 t = DualArray(new)
 
 @time gradient(sigmoid, new)
+
+
+
+
+
+
+rr = rand(4)
+
+I(3)
+
+Matrix(I, 3, 3 ,3)
