@@ -1,10 +1,13 @@
 ### simple Automatic Differentiation with Dual Numbers
 using Distributions, LinearAlgebra
+using StaticArrays
+
 
 struct Dual <: Number
-    f::Real
+    f::Union{Real, Dual}
     g::Array
 end
+
 
 ### Differentiation rules via overloading ###
 
@@ -25,6 +28,7 @@ import Base: +,/,*,-,^, convert, promote_rule
 /(y::Real, x::Dual) = Dual(y/x.f, (-y*x.g) / x.f^2)
 /(x::Dual, y::Real) = Dual(x.f/y, x.g/y)
 ^(x::Dual, k::Real) = Dual(x.f^k, (x.g * k) * x.f ^ (k-1))
+^(x::Dual, k::Int) = Dual(x.f^k, (k * x.f ^ (k-1)) * x.g)
 Base.exp(x::Dual) = Dual(exp(x.f), x.g * exp(x.f))
 Base.sqrt(x::Dual) = Dual(sqrt(x.f), x.g / (2 * sqrt(x.f)))
 Base.log(x::Dual) = Dual(log(x.f), x.g/x.f)
@@ -67,7 +71,12 @@ function DualArray(x)
     return collect
 end
 
-t = DualArray(new)
+
+
+
+@time t = DualArray(new)
+@time p = DualArray2(new)
+
 
 @time gradient(sigmoid, new)
 
@@ -76,8 +85,61 @@ t = DualArray(new)
 
 
 
+view(t,1,:,)
+
 rr = rand(4)
 
 I(3)
 
 Matrix(I, 3, 3 ,3)
+
+using StaticArrays
+
+struct Foo{N,T, L}
+    x::SMatrix{N,N,T, L}
+    y::SVector{N,T}
+end
+
+
+f(x) = x^3
+
+f(Dual(3,1))
+
+
+
+d(x) = f(Dual(x, 1))
+
+d(Dual(2,1))
+
+f(Dual(Dual(5,1),1))
+
+f(x) = x'*x
+me = rand(10)
+
+function higherorder(f, x, n)
+    return dechain(f(chain(x,n)))
+end
+
+@time higherorder(f, 2, 3)
+
+
+function chain(x, n)
+    if n == 1
+        return Dual(x, 1)
+    else
+        return chain(Dual(x, 1), n-1)
+    end
+end
+
+
+function dechain(x)
+    if x.g[1] isa Real
+        return x.g[1]
+    else
+        dechain(x.g[1])
+    end
+end
+
+pp = f(u)
+
+dechain(pp)
