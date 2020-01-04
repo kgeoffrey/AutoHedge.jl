@@ -1,4 +1,4 @@
-This repository contains some financial models I implemented in Julia. Especially the package ForwardDiff is really cool and useful for this purpose.
+This repository contains some financial models I implemented in Julia.
 
 # 1. Finding the Implied Volatility
 
