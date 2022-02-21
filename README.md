@@ -15,9 +15,6 @@ Example with simulated options:
 
 
 
-You can find an online version here: [Interactive Volatility Surface](https://kgeoffrey.github.io/quantfinance/graph.html)
-
-
 # 3. Delta Hedging Strategy
 
 Example:
