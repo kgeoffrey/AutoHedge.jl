@@ -1,91 +1,127 @@
-This repository contains some financial models I implemented in Julia.
-
-# 1. Finding the Implied Volatility
-
-The Black-Scholes equation for the price of a call option has 5 parametes, usually 4 of them can be observed directly: the price of the option, the maturity, the spot price of the underlying stock and the strike price. The fifth parameter is the (implied) volatility, but we cannot observe it directly. There exists no analytic solution for the implied volatility, luckily the BS-Scholes formula is a monotonicly increasing function of volatility, which means we can use fast (and simple) root finding algorithm like Newton's Method. 
-This is very easy to do with the Julia package 'ForwardDiff'([Forwarddiff Paper](https://arxiv.org/abs/1607.07892)), that I will also use to get the other 'Greeks' as shown in the examples below.
-
-### Black-Scholes  
-
-# 2. Volatility Surface
-We can plot the Volatility Surface by finding the IV (as described above) from options with the same underlying, but different strike prices and maturities.
-Example with simulated options:
-
-![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/volatilitysurface.png "Logo Title Text 1")
 
 
+# AutoHedge.jl
+This Julia package provides an implementation of automatic options hedging using automatic differentiation for obtaining the [Greeks](https://en.wikipedia.org/wiki/Greeks_(finance)). The package allows users to easily create and backtest complicated hedging strategies for a portfolio of European Options.
 
-# 3. Delta Hedging Strategy
+## Installation
+To install the package, simply run the following command in the Julia REPL:
 
-Example:
-
- - Simulating stock price with Gaussian walk (should be geometric Brown. motion) 
- - Rebalancing every 5th day 
- - Delta hedging portfolio consisting of N call options expiring at T = 200
- - Everything constant except for time and spotprice:
-    - K = 120
-    - r = 0.01
-    - q = 0
-    - N = 1000 (number of calls)
-    
- Stock Price:
- 
- ![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/stockprice.png "Logo Title Text 1")
- 
- Cash borrowing to finance stock purchase 
- 
- ![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/borrow.png "Logo Title Text 1")
- 
- Portfolio Value over time
- 
- ![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/value.png "Logo Title Text 1")
+```julia
+using Pkg
+Pkg.add("AutoHedge")
+```
 
 
-# 4. Delta-Gamma Hedging Strategy
+## Usage
+To use the automatic options hedging functionality provided by this package, you can import the package into your Julia session:
 
-An even better strategy is to try to hedge against changes in the delta of the derivative (second order derivative; also called Gamma).
-For this we bring in a another derivative with the same under lying stock, but a different strike price. 
+```julia
+using AutoHedge
+```
 
-Example:
- - Same stock price as before
- - Rebalancing every 5th day
- - Delta-Gamma hedging portfolio consisting of N call options expiring at T = 200
- - Everything constant except for time and spotprice: 
-   - K1 = 110
-   - K2 = 120
-   - r = 0.01
-   - q = 0
-   - N = 1000 (number of calls options with K1)
+### Example #1: Delta Hedging
+Say you have a portfolio of 10 call options and you want to make your portfolio [delta neutral](https://en.wikipedia.org/wiki/Delta_neutral). One way of achieving this is to buy or sell specific quantities of underlying stock - this is referred to as Delta Hedging. First create a portfolio, define the asset to be hedged (10 call options), and the array of hedging instruments (the underlying stock) and hedging strategies (delta in this case):
 
-We can see that the borrowing significantly decreased with the Delta-Gamma hedge:
-![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/borrowdeltagamma.png "Logo Title Text 1")
+```julia
+call_option = CallOption(100, 130., 5., 0.01, 0.2, 0.)
+stock = UnderlyingStock()
+portfolio = Portfolio(call_option, 10, [stock], ["delta"])
+```
 
-The tracking error is significantly smaller and in this case Delta-Gamma hedging is clearly the superior strategy - in theory. In practice, the leverage and liquidity for the derivatives required would be unrealistic 
-![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/valuedeltagamma.png "Logo Title Text 1")
+CallOption takes the arguments S, K, T, r, v, q - which stand for spot price, strike price, passage of time, risk free rate, volatility and continuously compounded dividend yield. The S, T and q can be random upon initiation, as they will be updated during the simulation. Furthermore it is important that the number of hedging strategies is the same as the number of hedging instruments, this will be explained [later below](#How-does-AutoHedge-work?). Next we simulate the price of the underlying stock:
 
-# 5. For fun: Delta-Gamma-Speed Hedging
+```julia
+using Plots
 
-If you know [Taylor's theorem](https://en.wikipedia.org/wiki/Taylor%27s_theorem) it should come to no surprise that adding more higher order greeks (we also need an additional derivative for each, to be able to solve the system of equations) yields an even better approximation. By adding another derivative we can make our portfolio 'speed' neutral (speed is the 3rd derivative of the call option with respect to price).
+stock_price = randomwalk(100, 500, 1)
+plot(stock_price, xlabel="Time", ylabel="Spot Price")
+```
+![Picture of Simulated Underlying Price](https://i.imgur.com/5UovmfY.png)
 
-Example:
- - Same stock price as before
- - Rebalancing every 5th day
- - Delta-Gamma hedging portfolio consisting of N call options expiring at T = 200
- - Everything constant except for time and spotprice: 
-   - K1 = 110
-   - K2 = 120
-   - K3 = 130
-   - r = 0.01
-   - q = 0
-   - N = 1000 (number of calls options with K1)
-   
- The tracking error is super small, but the leverage and liquidity required for each derivative is otherwordly :alien:
-![alt text](https://github.com/kgeoffrey/quantitativefinance/blob/master/fig/dgsvalue.png "Logo Title Text 1")
+Now that we have the evolution of the stock price of the underlying we can run a backtest of the hedging strategy and obtain the borrowing to fund hedging purchases, holdings of hedging instruments and tracking error over time. For the backtest, we also need to define the rebalancing frequency:
 
-# 6. Portfolio Optimization
+```julia
+rebalancing_frequency = 5  # we rebalance every 5 periods
+borrowing, volumes, tracking_errors = backtest(stock_price, rebalancing_frequency, portfolio)
+```
+As simple as that! Next we plot the results:
+```julia
+plot(borrowing, xlabel="Time", ylabel = "Cash Borrowing")
+plot(volumes', xlabel="Time", ylabel = "Volume", labels=permutedims(string.(typeof.(portfolio.hedging_instruments))))
+plot(tracking_errors, xlabel="Time", ylabel = "Tracking Error (Value of Portfolio)")
+```
 
-text about modern portfolio theory here
+![Borrowing](https://i.imgur.com/ShXL0H5.png)
 
-# 7. Machine Learning: Learning the Black-Scholes Formula
+![Volumes](https://i.imgur.com/ARyYimo.png)
 
-sources for learning Black-Scholes Formula
+![Tracking Error](https://i.imgur.com/eSiDshV.png)
+
+For this example you could experiment with rebalancing frequencies to reduce the tracking error even further. In the next example you see how you can hedge other greeks
+
+### Example #2: Delta-Theta-Vega Hedging
+
+In this example we will construct a portfolio that has neutral Delta, Theta, Charm and Speed. We have 100 call options in our portfolio and need 3 additional hedging instruments for our strategy:
+
+```julia
+call_option = CallOption(100, 130., 5., 0.01, 0.2, 0.)
+
+stock = UnderlyingStock()
+f1 = CallOption(100., 130., 5., 0.01, 0.2, 0.)
+f2 = PutOption(100., 120., 5., 0.01, 0.2, 0.)
+
+portfolio = Portfolio(call_option, 10, [stock, f1, f2], ["delta", "theta", "vega"])
+```
+We use the same simulated stock price as before and create the backtest:
+```julia
+rebalancing_frequency = 5
+borrowing, volumes, tracking_errors = backtest(stock_price, rebalancing_frequency, portfolio)
+```
+
+![Borrwing](https://i.imgur.com/SrvcTyE.png)
+
+![Volumes](https://i.imgur.com/KljWlfz.png)
+
+![Volumes](https://i.imgur.com/GT1s76M.png)
+
+As you can see, depending on how many greeks you want to hedge, borrowing and asset volume can explode. Furthermore you should be wary of the [Moneyness](https://en.wikipedia.org/wiki/Moneyness) of your hedging instruments with regard to the simulated stock price, especially when you select many Greeks to hedge this can lead to numerical errors.
+
+
+## How does AutoHedge work?
+
+AutoHedge uses [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl) to get the Greeks of European Options. Next a system of linear equations is solved to obtain the cash borrowings, and hedging instrument volumes. The simple Delta-Hedge shown in Example #1 needs to fulfill 2 requirements, where B is the borrowing and $n_{1}$ the volume of stocks purchased:
+It needs to be self-financing:
+```math
+-Nf + n_{1}S - B = 0
+```
+and it needs to be Delta Neutral as per definition:
+```math
+-N\Delta + n_{1} * 1 - 0 = 0
+```
+
+By rearranging, we can write the equations in matrix form, so they can be solved easily:
+
+```math
+Ax = b
+```
+```math
+x = A^{-1} b
+```
+where,
+```math
+A = \begin{bmatrix} -1 & S \\ 0 & 1 \end{bmatrix}, b =  \begin{bmatrix} Nf \\ N \Delta \end{bmatrix}, x =  \begin{bmatrix} B  \\ n_{1} \end{bmatrix}  
+```
+
+Similarly, we can add other Greeks, but for the A to be invertible and square, we cannot have an overdetermined system (more equations to balance than variables). Thus for each new hedging strategy we need to add a unique hedging instrument to the portfolio. We take Example #2, where we hedge portfolio delta, theta and vega:
+
+```math
+A = \begin{bmatrix} -1 & S & f_2 & f_3 \\ 0 & 1  & \Delta_2 & \Delta_3 \\ 0 & 0  & \Theta_2 & \Theta_3 \\ 0 & 0  & \nu_2 & \nu_3
+ \end{bmatrix}, b =  \begin{bmatrix} Nf \\ N \Delta_1 \\ N \Theta_1 \\ N \nu_1  \end{bmatrix}, x =  \begin{bmatrix} B  \\ n_{1}  \\ n_{2}  \\ n_{3} \end{bmatrix}  
+```
+
+
+## Contributing
+Contributions to this package are welcome! If you find a bug or have a feature request, please create an issue on the GitHub repository. If you would like to contribute code, please fork the repository and create a pull request.
+
+## License
+This package is licensed under the [MIT License](https://opensource.org/license/mit/).

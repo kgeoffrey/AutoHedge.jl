@@ -1,0 +1,17 @@
+name = "AutoHedge"
+uuid = "5adc4772-ae7d-4d28-ac91-6e53eefa6eae"
+authors = ["Geoffrey-Kasenbacher"]
+version = "1.0.0-DEV"
+
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
