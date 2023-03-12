@@ -119,7 +119,7 @@ A = \begin{bmatrix} -1 & S & f_2 & f_3 \\ 0 & 1  & \Delta_2 & \Delta_3 \\ 0 & 0 
  \end{bmatrix}, b =  \begin{bmatrix} Nf \\ N \Delta_1 \\ N \Theta_1 \\ N \nu_1  \end{bmatrix}, x =  \begin{bmatrix} B  \\ n_{1}  \\ n_{2}  \\ n_{3} \end{bmatrix}  
 ```
 
-[^1]: [°c 2007 Prof. Yuh-Dauh Lyuu, National Taiwan University](https://www.csie.ntu.edu.tw/~lyuu/finance1/2007/20070509.pdf)
+[^1]: [2007 Prof. Yuh-Dauh Lyuu, National Taiwan University](https://www.csie.ntu.edu.tw/~lyuu/finance1/2007/20070509.pdf)
 
 ## Contributing
 Contributions to this package are welcome! If you find a bug or have a feature request, please create an issue on the GitHub repository. If you would like to contribute code, please fork the repository and create a pull request.
