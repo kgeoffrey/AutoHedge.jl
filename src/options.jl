@@ -1,20 +1,20 @@
 using ForwardDiff, Distributions
 
 ## Seting up the Black-Scholes formulas for value of call and put:
-d = Normal()
-d1(S,K,T,r,v) = (log(S / K) + (r + v * v / 2) * T) / (v * sqrt(T))
-d2(S,K,T,r,v) = (log(S / K) + (r + v * v / 2) * T) / (v * sqrt(T)) - v * sqrt(T)
+d1(S::Any,K::Float64,T::Any,r::Float64,v::Any) = (log(S / K) + (r + v * v / 2) * T) / (v * sqrt(T))
+d2(S::Any,K::Float64,T::Any,r::Float64,v::Any) = (log(S / K) + (r + v * v / 2) * T) / (v * sqrt(T)) - v * sqrt(T)
 
-function calloptionprice(S, K, T, r, v, q)
-    return S * exp(-q * T) * cdf(d, d1(S, K, T, r, v)) - K * exp(-r * T) * cdf(d, d2(S ,K ,T , r, v))
+function calloptionprice(S::Any, K::Float64, T::Any, r::Float64, v::Any, q::Float64)
+    return S * exp(-q * T) * cdf(Normal(), d1(S, K, T, r, v)) - K * exp(-r * T) * cdf(Normal(), d2(S ,K ,T , r, v))
 end
 
-function putoptionprice(S, K, T, r, v, q)
-    return K * exp(-r * T) * cdf(d, -d2(S, K, T, r, v)) - S * exp(-q * T) * cdf(d, -d1(S, K, T, r, v))
+function putoptionprice(S::Any, K::Float64, T::Any, r::Float64, v::Any, q::Float64)
+    return K * exp(-r * T) * cdf(Normal(), -d2(S, K, T, r, v)) - S * exp(-q * T) * cdf(Normal(), -d1(S, K, T, r, v))
 end
 
+abstract type Asset end
 
-mutable struct CallOption
+mutable struct CallOption <: Asset
     S::Float64
     K::Float64
     T::Float64
@@ -42,7 +42,7 @@ mutable struct CallOption
 
     ultima::Function
 
-    function CallOption(S, K, T, r, v, q)
+    function CallOption(S::Any, K::Float64, T::Any, r::Float64, v::Any, q::Float64)
         #closure_ = S -> calloptionprice(S, K, T, r, v, q)
         #value based
         value(S, T, v) = calloptionprice(S, K, T, r, v, q)
@@ -72,8 +72,7 @@ mutable struct CallOption
     end
 end
 
-
-mutable struct PutOption
+mutable struct PutOption <: Asset
     S::Float64
     K::Float64
     T::Float64
@@ -101,7 +100,7 @@ mutable struct PutOption
 
     ultima::Function
 
-    function PutOption(S, K, T, r, v, q)
+    function PutOption(S::Any, K::Float64, T::Any, r::Float64, v::Any, q::Float64)
         #closure_ = S -> calloptionprice(S, K, T, r, v, q)
         #value based
         value(S, T, v) = putoptionprice(S, K, T, r, v, q)
@@ -131,8 +130,7 @@ mutable struct PutOption
     end
 end
 
-
-mutable struct UnderlyingStock
+mutable struct UnderlyingStock <: Asset
     #S::Float64
     #T::Float64
     #q::Float64
@@ -187,13 +185,13 @@ mutable struct UnderlyingStock
     end
 end
 
-
 mutable struct Portfolio
-    f::Any
+    f::Asset
     N::Int64
-    hedging_instruments::Array
-    greeks::Array
+    hedging_instruments::Array{<:Asset}
+    greeks::Array{String}
+    function Portfolio(f::Asset, N::Int64, hedging_instruments::Array{<:Asset}, greeks::Array{String})
+        @assert length(hedging_instruments) == length(greeks) "The number of hedging instruments needs to be the same as the number of greeks"
+        new(f, N, hedging_instruments, greeks)
+    end
 end
-
-
-# export d, d1, d2, calloptionprice, putoptionprice, CallOption, PutOption, UnderlyingStock, Portfolio

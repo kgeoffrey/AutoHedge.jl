@@ -1,6 +1,4 @@
-
-
-function randomwalk(start, len, num_walks)
+function randomwalk(start::Int64, len::Int64, num_walks::Int64)
     A = zeros(len, num_walks)
     for i in 1:num_walks
         gaussian_walk = zeros(len)
@@ -9,12 +7,13 @@ function randomwalk(start, len, num_walks)
             gaussian_walk[n] = gaussian_walk[n-1] + rand(Normal())
         end
         G = gaussian_walk
-        A[:,i] = G
+        A[: ,i] = G
     end
     return A
 end
 
-function convertdata(test, freq)
+
+function convertdata(test::Array{Float64, 2}, freq::Int64)
     function remove!(a, item)
         deleteat!(a, findall(x->x==item, a))
     end

@@ -47,7 +47,7 @@ borrowing, volumes, tracking_errors = backtest(stock_price, rebalancing_frequenc
 As simple as that! Next we plot the results:
 ```julia
 plot(borrowing, xlabel="Time", ylabel = "Cash Borrowing")
-plot(volumes', xlabel="Time", ylabel = "Volume", labels=permutedims(string.(typeof.(portfolio.hedging_instruments))))
+plot(volumes, xlabel="Time", ylabel = "Volume", labels=permutedims(string.(typeof.(portfolio.hedging_instruments))))
 plot(tracking_errors, xlabel="Time", ylabel = "Tracking Error (Value of Portfolio)")
 ```
 

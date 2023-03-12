@@ -19,5 +19,5 @@ borrowing, volumes, tracking_errors = backtest(stock_price, rebalancing_frequenc
 # plots
 s1 = plot(stock_price, xlabel="Time", ylabel = "Spot Price")
 s2 = plot(tracking_errors, xlabel="Time", ylabel = "Tracking Error (Value of Portfolio)")
-s3 = plot(volumes', labels=permutedims(string.(typeof.(p.hedging_instruments))), xlabel="Time", ylabel = "Volume")
+s3 = plot(volumes, labels=permutedims(string.(typeof.(p.hedging_instruments))), xlabel="Time", ylabel = "Volume")
 s4 = plot(borrowing, xlabel="Time", ylabel = "Cash Borrowing")
