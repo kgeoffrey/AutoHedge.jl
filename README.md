@@ -8,7 +8,7 @@ To install the package, simply run the following command in the Julia REPL:
 
 ```julia
 using Pkg
-Pkg.add("AutoHedge")
+Pkg.add(url="https://github.com/kgeoffrey/AutoHedge.jl")
 ```
 
 
