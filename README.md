@@ -1,7 +1,7 @@
 
 
 # AutoHedge.jl
-This Julia package provides an implementation of automatic options hedging using automatic differentiation for obtaining the [Greeks](https://en.wikipedia.org/wiki/Greeks_(finance)). The package allows users to easily create and backtest complicated hedging strategies for a portfolio of European Options.
+This Julia package provides an implementation of automatic options hedging using automatic differentiation for obtaining the [Greeks](https://en.wikipedia.org/wiki/Greeks_(finance)). The package allows users to easily create and backtest complicated hedging strategies for a portfolio of European Options and the underlying asset.
 
 ## Installation
 To install the package, simply run the following command in the Julia REPL:
