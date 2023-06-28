@@ -1,7 +1,7 @@
 
 
 # AutoHedge.jl
-This Julia package provides an implementation of automatic options hedging using automatic differentiation for obtaining the [Greeks](https://en.wikipedia.org/wiki/Greeks_(finance)). The package allows users to easily create and backtest complicated hedging strategies for a portfolio of European Options and the underlying asset.
+This Julia package provides an implementation of automatic options hedging using automatic differentiation for obtaining the [Greeks](https://en.wikipedia.org/wiki/Greeks_(finance)). The package allows users to easily create and backtest complicated hedging strategies for a portfolio of European Options and thier underlying asset.
 
 ## Installation
 To install the package, simply run the following command in the Julia REPL:
@@ -112,7 +112,7 @@ where,
 A = \begin{bmatrix} -1 & S \\ 0 & 1 \end{bmatrix}, b =  \begin{bmatrix} Nf \\ N \Delta \end{bmatrix}, x =  \begin{bmatrix} B  \\ n_{1} \end{bmatrix}  
 ```
 
-Similarly, we can add other Greeks, but for the A to be invertible and square, we cannot have an overdetermined system (more equations to balance than variables). Thus for each new hedging strategy we need to add a unique hedging instrument to the portfolio. We take Example #2, where we hedge portfolio delta, theta and vega:
+Similarly, we can add other Greeks, but for A to be invertible and square, we cannot have an overdetermined system (more equations to balance than variables). Thus for each new greek we want to hedge we need to add a unique hedging instrument to the portfolio. We take Example #2, where we hedge portfolio delta, theta and vega:
 
 ```math
 A = \begin{bmatrix} -1 & S & f_2 & f_3 \\ 0 & 1  & \Delta_2 & \Delta_3 \\ 0 & 0  & \Theta_2 & \Theta_3 \\ 0 & 0  & \nu_2 & \nu_3
