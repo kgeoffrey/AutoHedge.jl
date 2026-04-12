@@ -22,14 +22,14 @@ function hedge(portfolio::Portfolio, data::AbstractVector{<:Real})
 end
 
 function _default_maturity(price_path::AbstractVector{<:Real}, portfolio::Portfolio)
-    if hasfield(typeof(portfolio.f), :T)
+    if :T in fieldnames(typeof(portfolio.f))
         return Float64(getfield(portfolio.f, :T))
     end
     return length(price_path) / 365
 end
 
 function _default_volatility(portfolio::Portfolio)
-    if hasfield(typeof(portfolio.f), :v)
+    if :v in fieldnames(typeof(portfolio.f))
         return Float64(getfield(portfolio.f, :v))
     end
     return 0.2
