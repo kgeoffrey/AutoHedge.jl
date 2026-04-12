@@ -66,8 +66,8 @@ function backtest(price::Union{AbstractVector{<:Real}, AbstractMatrix{<:Real}},
 
     price_path = _price_path(price)
     n_steps = length(price_path)
-    maturity = isnothing(time_to_maturity) ? _default_maturity(price_path, portfolio) : Float64(time_to_maturity)
-    sigma = isnothing(volatility) ? _default_volatility(portfolio) : Float64(volatility)
+    maturity = time_to_maturity === nothing ? _default_maturity(price_path, portfolio) : Float64(time_to_maturity)
+    sigma = volatility === nothing ? _default_volatility(portfolio) : Float64(volatility)
     rebalance_steps = _rebalance_mask(n_steps, freq)
 
     borrow = zeros(Float64, n_steps)
