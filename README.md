@@ -1,7 +1,7 @@
 
 
 # AutoHedge.jl
-This Julia package provides an implementation of automatic options hedging using automatic differentiation for obtaining the [Greeks](https://en.wikipedia.org/wiki/Greeks_(finance)). The package allows users to easily create and backtest complicated hedging strategies for a portfolio of European Options and thier underlying asset.
+This Julia package provides an implementation of automatic options hedging using automatic differentiation for obtaining the [Greeks](https://en.wikipedia.org/wiki/Greeks_(finance)). The package allows users to easily create and backtest complicated hedging strategies for a portfolio of European options and their underlying asset.
 
 ## Installation
 To install the package, simply run the following command in the Julia REPL:
@@ -57,11 +57,22 @@ plot(tracking_errors, xlabel="Time", ylabel = "Tracking Error (Value of Portfoli
 
 ![Tracking Error](https://i.imgur.com/eSiDshV.png)
 
-For this example you could experiment with rebalancing frequencies to reduce the tracking error even further. In the next example you see how you can hedge other greeks
+For this example you could experiment with rebalancing frequencies to reduce the tracking error even further. You can also add proportional transaction costs for a more realistic simulation:
+
+```julia
+borrowing, volumes, tracking_errors = backtest(
+    stock_price,
+    rebalancing_frequency,
+    portfolio;
+    transaction_cost=0.001,
+)
+```
+
+In the next example you see how you can hedge other greeks.
 
 ### Example #2: Delta-Theta-Vega Hedging
 
-In this example we will construct a portfolio that has neutral Delta, Theta, Charm and Speed. We have 100 call options in our portfolio and need 3 additional hedging instruments for our strategy:
+In this example we will construct a portfolio that has neutral Delta, Theta, and Vega. We have 10 call options in our portfolio and need 3 additional hedging instruments for our strategy:
 
 ```julia
 call_option = CallOption(100, 130., 5., 0.01, 0.2, 0.)
